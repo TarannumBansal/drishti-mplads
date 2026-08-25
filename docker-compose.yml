@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: drishti
+      POSTGRES_PASSWORD: drishti
+      POSTGRES_DB: drishti
+    volumes: [ "pgdata:/var/lib/postgresql/data" ]
+    ports: [ "5432:5432" ]
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://drishti:drishti@db:5432/drishti
+      DATAGOVIN_API_KEY: ${DATAGOVIN_API_KEY:-}
+      CORS_ORIGINS: "*"
+    depends_on: [ db ]
+    ports: [ "8000:8000" ]
+  web:
+    build: ./frontend
+    environment:
+      VITE_API_BASE: "http://localhost:8000"
+    ports: [ "8080:80" ]
+    depends_on: [ api ]
+volumes: { pgdata: {} }
